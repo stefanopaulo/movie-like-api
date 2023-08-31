@@ -10,10 +10,15 @@ export class MoviesService {
   ) {}
 
   async likeMovie(movieId: string): Promise<Movie | null> {
-    const existingMovie = await this.movieModel.findById(movieId);
+    let movie = await this.movieModel.findByIdAndUpdate(
+      /* eslint-disable indent, spaced-comment */
+      movieId,
+      { $inc: { likes: 1 } },
+      { new: true, upsert: true },
+    );
 
-    if (!existingMovie) {
-      const movie = new this.movieModel({
+    if (!movie) {
+      movie = new this.movieModel({
         _id: movieId,
         likes: 1,
       });
@@ -21,12 +26,6 @@ export class MoviesService {
       await movie.save();
       return movie;
     }
-
-    const movie = await this.movieModel.findByIdAndUpdate(
-      /* eslint-disable indent, spaced-comment */
-      movieId,
-      { $inc: { likes: 1 } },
-    );
 
     return movie;
   }
